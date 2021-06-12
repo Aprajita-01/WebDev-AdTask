@@ -694,7 +694,7 @@ ul {
  .contact {
    border-radius: 5px;
    padding: 20px;
-   background-color: #000000;
+   background-color: #575050;
    width: 100vw;
  }
  
@@ -709,7 +709,7 @@ footer{
 	align-items: center;
 	text-align: center;
 	color: #fff;
-	background-color: #8d8e8f;
+	background-color: black;
 	padding: 60px 0;
 	width: 100vw;
 }
