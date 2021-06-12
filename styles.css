@@ -34,6 +34,7 @@ body {
 	height:55px;
 	align-items: center;
 	overflow: scroll;
+	
   }
   #sticky a{
 	text-decoration: none;
@@ -44,6 +45,7 @@ body {
   @media (max-width: 1000px){
 	  #sticky{
 		  font-size: 30px;
+		  height:auto;
 	  }
   }
   /* Change the color of links on hover */
