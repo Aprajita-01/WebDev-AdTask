@@ -41,7 +41,7 @@ body {
 	text-align: center;
 	color: white;
   }
-  @media (max-width: 1000px){
+  @media (max-width: 600px){
 	  #sticky{
 		  font-size: 30px;
 		  height:auto;
