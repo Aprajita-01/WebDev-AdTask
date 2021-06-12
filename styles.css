@@ -39,7 +39,7 @@ html{
   @media (max-width: 600px){
 	  #sticky{
 		  font-size: 30px;
-		  overflow: scroll;
+		  overflow-y: scroll;
 	  }
   }
   /* Change the color of links on hover */
