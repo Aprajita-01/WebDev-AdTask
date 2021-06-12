@@ -14,11 +14,7 @@ html{
 	scroll-behavior: smooth;
 	
 }
-body {
-  position: relative;
-  height: auto;
-  min-height: 100% !important;
-}
+
 #sticky {
 	position: -webkit-sticky;
 	position: sticky;
@@ -33,7 +29,8 @@ body {
 	justify-content: space-between;
 	align-items: center;
 	overflow: scroll;
-	height: 55px
+	min-height: 55px;
+	height:auto
   }
   #sticky a{
 	text-decoration: none;
