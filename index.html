@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Responsive Landing Page Template With Flexbox</title>
+
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=PT+Sans&display=swap" rel="stylesheet">   
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+	<header>
+		<h2><a href="https://www.amazon.in/"><img src="https://pngimg.com/uploads/amazon/amazon_PNG11.png" style="width: 200px;"></a></h2>
+	</header>
+
+<script>
+	                document.addEventListener(
+                    "scroll",
+                    function() {
+                        var scrollTop =
+                        document.documentElement["scrollTop"] || document.body["scrollTop"];
+                        var scrollBottom =
+                        (document.documentElement["scrollHeight"] ||
+                            document.body["scrollHeight"]) - document.documentElement.clientHeight;
+                        scrollPercent = scrollTop / scrollBottom * 100 + "%";
+                        document
+                        .getElementById("_progress")
+                        .style.setProperty("--scroll", scrollPercent);
+                    },
+                    { passive: true }
+                    );
+
+
+						console.clear();
+						const canvas = document.createElement('canvas');
+						document.body.append(canvas);
+						canvas.style.display = 'block';
+						canvas.style.width = '100vw';
+						canvas.style.height = '100vh';
+
+						canvas.width = canvas.offsetWidth;
+						canvas.height = canvas.offsetHeight;
+
+						const gl = canvas.getContext('webgl2');
+						if (!gl) {
+							alert('require webgl 2.0, bye')
+						}
+
+						const vss = `#version 300 es
+						in vec2 p;
+						void main() {
+						gl_Position = vec4(p, 0.0, 1.0);
+						}
+						`;
+
+						const fss = `#version 300 es
+						precision mediump float;
+						out vec4 o;
+						uniform vec4 c;
+						void main() {
+						o = c;
+						}
+						`;
+
+
+						// Create shader program
+						// # should query both shader logs and program logs
+						// #  only if program link's status is false.
+						// 
+						// Here's the antipattern .. keep for ref
+						//
+
+						const vs = gl.createShader(gl.VERTEX_SHADER);
+						gl.shaderSource(vs, vss);
+						gl.compileShader(vs);
+						if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+							console.error(gl.getShaderInfoLog(vs));
+							throw 1;
+						}
+
+						const fs = gl.createShader(gl.FRAGMENT_SHADER);
+						gl.shaderSource(fs, fss);
+						gl.compileShader(fs);
+						if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+							console.error(gl.getShaderInfoLog(fs));
+							throw 2;
+						}
+
+						const prg = gl.createProgram();
+						gl.attachShader(prg, vs);
+						gl.attachShader(prg, fs);
+						gl.linkProgram(prg);
+						if (!gl.getProgramParameter(prg, gl.LINK_STATUS)) {
+							console.error(gl.getProgramInfoLog(prg));
+							throw 3;
+						}
+
+						gl.detachShader(prg, vs);
+						gl.deleteShader(vs);
+						gl.detachShader(prg, fs);
+						gl.deleteShader(fs);
+
+						// ---- End of antipattern ----
+
+						const $p = gl.getAttribLocation(prg, 'p');
+						const $c = gl.getUniformLocation(prg, 'c');
+
+						const va = gl.createVertexArray();
+						gl.bindVertexArray(va);
+
+						const N = 300; // n triangles
+
+						let ps;
+						{    
+							ps = new Float32Array(2 + N * 2 * 2);
+							ps[0] = 0; // clip space center
+							ps[1] = 0;
+							let j = 2;
+							for (let i = 0; i < N; ++i) {
+								ps[j++] = Math.random() * 2 - 1; //x 
+								ps[j++] = Math.random() * 2 - 1; //y
+								ps[j++] = Math.random() * 2 - 1; //x 
+								ps[j++] = Math.random() * 2 - 1; //y
+							}
+						}
+
+						const buf = gl.createBuffer();
+						gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+						gl.bufferData(gl.ARRAY_BUFFER, ps, gl.DYNAMIC_DRAW);
+						gl.enableVertexAttribArray($p);
+						gl.vertexAttribPointer(
+							$p,
+							2, gl.FLOAT, // two 32b-float (8bytes)
+							false,
+							0, // skip n byte to fetch next
+							0  // skip n byte to fetch first
+						);
+
+						let idxs; 
+						{ 
+							idxs = new Uint16Array(3 * N);
+							let j = 0;
+							for (let i = 0; i < N; ++i) {
+								idxs[j++] = 0;
+								idxs[j++] = 1 + i * 2;
+								idxs[j++] = 2 + i * 2;
+							}
+						}
+
+						const ibuf = gl.createBuffer();
+						gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibuf);
+						gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxs, gl.STATIC_DRAW);
+
+						gl.bindVertexArray(null);
+
+						//----- render
+
+						gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+						gl.clearColor(0.1, 0.1, 0.1, 1);
+						gl.clearColor(0.1, 0.1, 0.1, 0.7);
+						gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+						gl.enable(gl.BLEND);
+						gl.disable(gl.CULL_FACE);
+						gl.useProgram(prg);
+						gl.bindVertexArray(va);
+
+
+
+						function f() {
+							gl.clear(gl.COLOR_BUFFER_BIT);
+							gl.uniform4fv($c, [0.2, 0.2, 0.2, 0.02]);
+							gl.drawElements(
+								gl.TRIANGLES,
+								idxs.length, // n indices
+								gl.UNSIGNED_SHORT, // ui16
+								0 // skip n bytes to fetch first
+							);
+						}
+						f();
+
+						// ---
+						gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+						document.body.onmousemove = (e) => {
+							ps[0] = e.clientX / window.innerWidth * 2 - 1;
+							ps[1] = -1 * (e.clientY / window.innerHeight * 2 - 1);
+							gl.bufferSubData(gl.ARRAY_BUFFER, 0, ps.slice(0, 2)); // that's why DYNAMIC_DRAW
+							f();
+						} 
+</script>
+	<section class="hero">
+		<div class="background-image" style="background-image: url(https://www.gannett-cdn.com/presto/2020/04/01/USAT/729e0a49-acb6-40ad-8071-dc495a569430-kindle-hero.jpg?auto=webp&crop=2111,1187,x9,y0&format=pjpg&width=1200);"></div>
+		<h1>Kindle</h1>
+		<a href="https://www.amazon.com/Kindle-Now-with-Built-in-Front-Light/dp/B07978J597" class="btn">Buy Now</a>
+	</section>
+
+	<div id="sticky">
+		<a href="#Kindle">Kindle</a>
+		<a href="#Features">Features</a>
+		<a href="#Offers">Offers</a>
+		<a href="#Contact">Contact Us</a>
+		<a href="https://www.amazon.com/Kindle-Now-with-Built-in-Front-Light/dp/B07978J597">Buy Now</a>
+	</div>
+	<div id="_progress"></div>
+
+
+	<section class="kindle-collection" id="Kindle">
+		<h3 class="title">The Kindle range</h3>
+		<p>From a multi-purpose Kindle to one for your kids, you can find them all here.</p>
+		<hr>
+
+		<section class="project_main_container">
+			<ul>       
+				<li>
+					<div class="project_container">
+						<div class="project_media">
+							<img class="project_image" src="https://cdn.vox-cdn.com/thumbor/LMeAuVidszD_cp3wg2DdBdEmQEA=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/13276559/Kindle_Paperwhite_lifestyle_image_1.jpg"></img>
+							<h1>Kindle Paperwhite</h1>
+						</div>
+					</div>
+				</li>        
+				<li>
+					<div class="project_container">
+						<div class="project_media">
+							<img class="project_image" src="https://thumbor.forbes.com/thumbor/fit-in/1200x0/filters%3Aformat%28jpg%29/https%3A%2F%2Fblogs-images.forbes.com%2Fdavidphelan%2Ffiles%2F2019%2F06%2FKindle-Oasis_Gold-1200x1200.jpg"></img>
+							<h1>Kindle Oasis</h1>
+						</div>
+		
+					</div>
+				</li>         
+				<li>
+					<div class="project_container">
+						<div class="project_media">
+							<img class="project_image" src="https://i2-prod.manchestereveningnews.co.uk/incoming/article17048201.ece/ALTERNATES/s1200c/0_Amazon-unveils-Kindle-e-reader-for-children.jpg" ></img>
+							<h1>Kindle Kids Edition</h1>
+						</div>
+					</div>
+				</li>         
+				<li>
+					<div class="project_container">
+						<div class="project_media">
+							<img class="project_image" src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/amazon-fire-hd-10-1570526216.jpeg?crop=0.625xw:1xh;center,top&resize=480:*"></img>
+							<h1>Fire HD 10</h1>
+						</div>
+					</div>
+				</li>    
+			</ul>
+			</section>    
+
+	</section>
+	
+
+	<section class="features" id="Features">
+		<h3 class="title">Features</h3>
+		<p>Kindle offers world-class features in one portable package.</p>
+		<hr>
+
+		<ul class="grid">
+			<li>
+				<i class="fa fa-battery-full"></i>
+				<h4>Long battery life</h4>
+				<p>Unlike tablets and smartphones, Kindle lets you read for weeks on a single charge.</p>
+			</li>
+			<li>
+				<i class="fa fa-bell-slash" ></i>
+				<h4>Read distraction free</h4>
+				<p>With no interruptions from texts, emails, or social media, you can lose yourself in the story.</p>
+			</li>
+			<li>
+				<i class="fa fa-adjust"></i>
+				<h4>Adjustable lighting</h4>
+				<p>The glare-free light and built-in front light are easier on your eyes than back-lit screens, so you can read for hours.</p>
+			</li>
+		</div>
+	</section>
+
+
+	<section class="offers" id="Offers">
+		<h3 class="title">Offers</h3>
+		<hr>
+		<div class="offer-container">
+		<div class="offer_card">
+			<div class="container page-wrapper">
+				<div class="page-inner">
+				  <div class="row">
+					<div class="el-wrapper">
+					  <div class="box-up">
+						<img class="img" src="https://www.history.com/.image/ar_16:9%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cg_faces:center%2Cq_auto:good%2Cw_768/MTY5MDk1ODMyOTUwNTQ4MzYy/american-christmas-traditions-gettyimages-487756624.jpg" alt="christmas">
+						<div class="img-info">
+						  <div class="info-inner">
+							<span class="offer-name">Christmas offer!</span>
+						  </div>
+						  <div class="offer-info">Avail upto 25% discount on the Kindle till 25th December. Additional discounts on Kindle covers available</div>
+						</div>
+					  </div>
+			  
+					  <div class="box-down">
+						<div class="h-bg">
+						  <div class="h-bg-inner"></div>
+						</div>
+			  
+						<a class="cart" href="#">
+						  <span class="promo-code">Use code XMAS21</span>
+						  <span class="promo-title">
+							<span class="txt">Expires December 25</span>
+						  </span>
+						</a>
+					  </div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+		</div>
+		<div class="offer_card">
+			<div class="container page-wrapper">
+				<div class="page-inner">
+				  <div class="row">
+					<div class="el-wrapper">
+					  <div class="box-up">
+						<img class="img" src="https://static.india.com/wp-content/uploads/2015/11/hdfc-bank-logo_regular-2.jpg" alt="">
+						<div class="img-info">
+						  <div class="info-inner">
+							<span class="offer-name">Ereader Extravaganza</span>
+						  </div>
+						  <div class="offer-info">5% discount across the Kindle range of products on paymnets using an HDFC credit card.</div>
+						</div>
+					  </div>
+			  
+					  <div class="box-down">
+						<div class="h-bg">
+						  <div class="h-bg-inner"></div>
+						</div>
+			  
+						<a class="cart" href="#">
+						  <span class="promo-code">Use code HDFC87</span>
+						  <span class="promo-title">
+							<span class="txt">Expires November 30</span>
+						  </span>
+						</a>
+					  </div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+		</div>
+	</div>
+	</section>
+
+
+	<section class="contact" id="Contact">
+		<h3 class="title">Contact Us</h3>
+		<p>Fill out the form, and we'll get back to you as soon as we can.</p>
+		<hr>
+
+                <form action="action_page.php">
+              
+                  <label for="fname">First Name</label>
+                  <input type="text" id="fname" name="firstname" placeholder="Your name..">
+              
+
+                  </select>
+              
+                  <label for="subject">Subject</label>
+                  <textarea id="subject" name="subject" placeholder="Write something.." style="height:100px"></textarea>
+              
+                  <input type="submit" value="Submit">
+              
+                </form>
+	</section>
+
+	<footer>
+		<ul>
+			<li><a href="#"><i class="fa fa-twitter-square"></i></a></li>
+			<li><a href="#"><i class="fa fa-facebook-square"></i></a></li>
+			<li><a href="#"><i class="fa fa-snapchat-square"></i></a></li>
+			<li><a href="#"><i class="fa fa-github-square""></i></a></li>
+		</ul>
+		<p>Website courtesy <a href="http://tutorialzine.com/" target="_blank">Aprajita</a></p>
+
+</body>
+
+</html>
