@@ -41,7 +41,10 @@ html{
 		  font-size: 30px;
 		  overflow-y: scroll;
 	  }
-  }
+	  #sticky a{
+		  widtth:75%
+	  }
+}
   /* Change the color of links on hover */
   a:hover, a:active{
 	background-color:#2a2a2a;
